@@ -21,3 +21,4 @@ Interview notes, diagrams, and (later) small demos for Spring Boot.
 | Doc | Path |
 |---|---|
 | Spring Boot Internals | [`01-fundamentals/SPRING-BOOT-INTERNALS.md`](01-fundamentals/SPRING-BOOT-INTERNALS.md) |
+| Maven → classpath → auto-config | [`01-fundamentals/MAVEN-CLASSPATH-AUTOCONFIG.md`](01-fundamentals/MAVEN-CLASSPATH-AUTOCONFIG.md) |
