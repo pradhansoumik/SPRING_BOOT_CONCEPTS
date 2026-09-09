@@ -1,7 +1,7 @@
 # Auto-config demo — connect the dots
 
 **Theory:** `../MAVEN-CLASSPATH-AUTOCONFIG.md`  
-**Run:** `mvn -f 01-fundamentals/autoconfig-demo/pom.xml spring-boot:run`
+**Run:** `mvn -f 01-fundamentals/spring-boot-internals/autoconfig-demo/pom.xml spring-boot:run`
 
 Watch the console block `after refresh() (ApplicationRunner)`.
 

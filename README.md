@@ -18,8 +18,11 @@ Interview notes, diagrams, and (later) small demos for Spring Boot.
 
 ## 01 — Fundamentals
 
+All internals notes + demo live in **`01-fundamentals/spring-boot-internals/`**.
+
 | Doc | Path |
 |---|---|
-| Spring Boot Internals | [`01-fundamentals/SPRING-BOOT-INTERNALS.md`](01-fundamentals/SPRING-BOOT-INTERNALS.md) |
-| Maven → classpath → auto-config | [`01-fundamentals/MAVEN-CLASSPATH-AUTOCONFIG.md`](01-fundamentals/MAVEN-CLASSPATH-AUTOCONFIG.md) |
-| Auto-config **demo** | [`01-fundamentals/autoconfig-demo/DEMO.md`](01-fundamentals/autoconfig-demo/DEMO.md) |
+| Spring Boot Internals | [`01-fundamentals/spring-boot-internals/SPRING-BOOT-INTERNALS.md`](01-fundamentals/spring-boot-internals/SPRING-BOOT-INTERNALS.md) |
+| Maven → classpath → auto-config | [`01-fundamentals/spring-boot-internals/MAVEN-CLASSPATH-AUTOCONFIG.md`](01-fundamentals/spring-boot-internals/MAVEN-CLASSPATH-AUTOCONFIG.md) |
+| Auto-config **annotations** | [`01-fundamentals/spring-boot-internals/AUTOCONFIG-ANNOTATIONS.md`](01-fundamentals/spring-boot-internals/AUTOCONFIG-ANNOTATIONS.md) |
+| Auto-config **demo** | [`01-fundamentals/spring-boot-internals/autoconfig-demo/DEMO.md`](01-fundamentals/spring-boot-internals/autoconfig-demo/DEMO.md) |
