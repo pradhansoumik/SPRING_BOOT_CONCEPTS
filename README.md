@@ -9,8 +9,8 @@ Interview notes, diagrams, and (later) small demos for Spring Boot.
 | # | Topic | Status |
 |---|---|---|
 | 01 | **Spring Boot Internals** | ✅ Notes |
-| 02 | IoC, DI & Beans | ⏳ Next |
-| 03 | Configuration & Profiles | ⏳ |
+| 02 | **IoC, DI & Beans** | ✅ Notes |
+| 03 | Configuration & Profiles | ⏳ Next |
 | 04 | Web Layer (MVC) | ⏳ |
 | 05 | Data JPA & `@Transactional` | ⏳ |
 | 06 | Security (Boot wiring) | ⏳ |
@@ -26,3 +26,9 @@ All internals notes + demo live in **`01-fundamentals/spring-boot-internals/`**.
 | Maven → classpath → auto-config | [`01-fundamentals/spring-boot-internals/MAVEN-CLASSPATH-AUTOCONFIG.md`](01-fundamentals/spring-boot-internals/MAVEN-CLASSPATH-AUTOCONFIG.md) |
 | Auto-config **annotations** | [`01-fundamentals/spring-boot-internals/AUTOCONFIG-ANNOTATIONS.md`](01-fundamentals/spring-boot-internals/AUTOCONFIG-ANNOTATIONS.md) |
 | Auto-config **demo** | [`01-fundamentals/spring-boot-internals/autoconfig-demo/DEMO.md`](01-fundamentals/spring-boot-internals/autoconfig-demo/DEMO.md) |
+
+## 02 — IoC, DI & Beans
+
+| Doc | Path |
+|---|---|
+| IoC, DI & Beans | [`02-ioc-di/IOC-DI-BEANS.md`](02-ioc-di/IOC-DI-BEANS.md) |
