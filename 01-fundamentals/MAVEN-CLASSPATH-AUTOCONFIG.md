@@ -1,6 +1,6 @@
 # Maven → Classpath → Auto-Configuration
 
-**Remember:** Maven = **build time**. Spring Boot = **run time**. Boot never reads `pom.xml`.
+**Demo:** [`autoconfig-demo/DEMO.md`](autoconfig-demo/DEMO.md)
 
 ---
 
