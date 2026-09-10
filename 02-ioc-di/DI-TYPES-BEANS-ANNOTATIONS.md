@@ -182,13 +182,6 @@ public class PaymentConfig {
 
 The **class** is `@Configuration` (or `@Component` in lite mode). **`@Bean` never replaces `@Service` on a type** — that would be `@Component` / `@Service` on the **class**.
 
-`@Component` on `PaymentConfig` **also** registers those `@Bean` methods if the class is scanned (`@Configuration` is itself a `@Component`). Prefer **`@Configuration`** (full mode). `@Component` + `@Bean` is **lite** mode:
-
-| | `@Configuration` | `@Component` + `@Bean` |
-|---|---|---|
-| `@Bean` methods registered | Yes | Yes |
-| One `@Bean` method calls another in the **same** class | Same **singleton** from the container | Plain Java `new` → extra instance |
-
 **`@Import`** — `PaymentConfig` is **not** in the scanned package:
 
 ```java
