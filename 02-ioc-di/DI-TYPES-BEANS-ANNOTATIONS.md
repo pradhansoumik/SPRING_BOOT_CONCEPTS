@@ -55,6 +55,14 @@ public OrderService(PaymentClient payment) { this.payment = payment; }
 | **Benefits** | `final` / immutable; all required deps present; fail at startup if missing; easy unit test (`new OrderService(mock)`) |
 | **Drawbacks** | Many ctor args = class doing too much (split it) |
 
+**Rules**
+
+- Spring uses **only the `@Autowired` constructor** to create the bean.
+- Other constructors are **normal Java** — container **does not call** them; you can still `new OrderService(...)` in tests.
+- **Two** `@Autowired` ctors (both `required = true`) → **error** (ambiguous).
+- Several `@Autowired(required = false)` → Spring picks the one whose deps it **can** satisfy.
+- Multiple ctors and **none** annotated → Spring looks for a **no-arg** ctor; if none → **fail**.
+
 ### Setter — optional dependency
 
 Swap payment vendor **after** the object exists.
@@ -85,6 +93,14 @@ public void setPaymentClient(PaymentClient payment) { this.payment = payment; }
 | **Benefits** | Change / mock after creation; good for **optional** collaborators |
 | **Drawbacks** | Not `final`; easy to forget `@Autowired`; `required = false` → NPE later if you use it |
 
+**Rules**
+
+- No `@Autowired` / `@Inject` on the setter → Spring **never** calls it.
+- Default `@Autowired` → bean **must** exist or startup fails.
+- `@Autowired(required = false)` → missing bean → setter **not** called; field stays `null`.
+- Several setters can each have `@Autowired` (each is a separate injection point).
+- Setter injection happens **after** the object is constructed (no-arg or `@Autowired` ctor first).
+
 ### Field — avoid for new code
 
 Hidden wiring; Spring sets the field with **reflection** (setter is **not** called).
@@ -103,6 +119,14 @@ public class OrderService {
 |---|---|
 | **Benefits** | Least code |
 | **Drawbacks** | Not `final`; hidden deps; tests need Spring or reflection; NPE if you `new OrderService()` yourself |
+
+**Rules**
+
+- `@Autowired` on the **field** → Spring sets it via **reflection**; a setter is **not** used.
+- No `@Autowired` on the field → stays `null` (unless you set it yourself).
+- `@Autowired(required = false)` → missing bean → field stays `null`; app still starts.
+- `new OrderService()` yourself → **no** injection; field stays `null` → NPE when used.
+- Can mix with constructor (ctor for required, field for extras) — prefer not to; keep one style.
 
 ---
 
