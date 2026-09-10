@@ -14,11 +14,95 @@ OrderService  ──needs──►  PaymentClient
 
 | Type | How | `@Autowired` | Real life | Prefer? |
 |---|---|---|---|---|
-| **Constructor** | Pass `PaymentClient` in `new OrderService(...)` | Optional if **only one** constructor | Kitchen built **with** stove already installed | **Yes** — required deps, `final`, fail at startup if missing |
-| **Setter** | `setPaymentClient(...)` after object exists | **Required** (or `@Inject`) | Swap payment vendor later | Optional deps only |
-| **Field** | `@Autowired PaymentClient client;` | **Required** | Hidden wiring | Avoid in new code (hard to test, not `final`) |
+| **Constructor** | Pass `PaymentClient` in `new OrderService(...)` | **Optional** if **one** ctor; **required** if **2+** ctors (mark the one to use) | Kitchen built **with** stove already installed | **Yes** — required deps, `final`, fail at startup if missing |
+| **Setter** | `setPaymentClient(...)` after object exists | **Required** (or `@Inject`); `required = false` = optional dep | Swap payment vendor later | Optional deps only |
+| **Field** | `@Autowired PaymentClient client;` | **Required** | Hidden wiring (reflection, **no** setter) | Avoid in new code (hard to test, not `final`) |
 
-**Missing `PaymentClient` bean** → `UnsatisfiedDependencyException` (required injection). App does not start.
+**Better option:** **constructor** for required deps. Setter = optional extras. Field = avoid in new code.
+
+`@Autowired` is **not** “call setter.” It only injects **where you put it**.
+
+No `PaymentClient` bean + **required** injection → `UnsatisfiedDependencyException`, app does not start.
+
+### Constructor — **preferred**
+
+Kitchen built **with** the stove already in place.
+
+**`@Autowired` optional** — class has **exactly one** constructor (Spring 4.3+):
+
+```java
+@Service
+public class OrderService {
+    private final PaymentClient payment;
+
+    public OrderService(PaymentClient payment) {  // no @Autowired needed
+        this.payment = payment;
+    }
+}
+```
+
+**`@Autowired` required** — **two or more** constructors: tell Spring which one to use:
+
+```java
+public OrderService(PaymentClient payment, NotificationClient sms) { ... }
+
+@Autowired
+public OrderService(PaymentClient payment) { this.payment = payment; }
+```
+
+| | |
+|---|---|
+| **Benefits** | `final` / immutable; all required deps present; fail at startup if missing; easy unit test (`new OrderService(mock)`) |
+| **Drawbacks** | Many ctor args = class doing too much (split it) |
+
+### Setter — optional dependency
+
+Swap payment vendor **after** the object exists.
+
+**`@Autowired` required** — without it Spring **never** calls `setPaymentClient`:
+
+```java
+@Service
+public class OrderService {
+    private PaymentClient payment;   // cannot be final
+
+    @Autowired
+    public void setPaymentClient(PaymentClient payment) {
+        this.payment = payment;
+    }
+}
+```
+
+**Optional** (bean missing → still start, field may stay `null`):
+
+```java
+@Autowired(required = false)
+public void setPaymentClient(PaymentClient payment) { this.payment = payment; }
+```
+
+| | |
+|---|---|
+| **Benefits** | Change / mock after creation; good for **optional** collaborators |
+| **Drawbacks** | Not `final`; easy to forget `@Autowired`; `required = false` → NPE later if you use it |
+
+### Field — avoid for new code
+
+Hidden wiring; Spring sets the field with **reflection** (setter is **not** called).
+
+**`@Autowired` required** on the field (or it stays `null`):
+
+```java
+@Service
+public class OrderService {
+    @Autowired
+    private PaymentClient payment;   // not final; hard to unit-test without Spring
+}
+```
+
+| | |
+|---|---|
+| **Benefits** | Least code |
+| **Drawbacks** | Not `final`; hidden deps; tests need Spring or reflection; NPE if you `new OrderService()` yourself |
 
 ---
 
@@ -77,20 +161,7 @@ If `PaymentClient` has **no** stereotype and **no** `@Bean` → nothing to injec
 
 ---
 
-## 4. Tiny snippets (only the two patterns)
-
-Constructor (preferred):
-
-```java
-@Service
-public class OrderService {
-    private final PaymentClient payment;
-
-    public OrderService(PaymentClient payment) {  // @Autowired optional
-        this.payment = payment;
-    }
-}
-```
+## 4. Tiny snippets (`@Qualifier` / `@Bean`)
 
 Two payment beans — pick one:
 
