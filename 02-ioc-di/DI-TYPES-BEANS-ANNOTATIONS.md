@@ -165,6 +165,15 @@ public class PaymentConfig {
 }
 ```
 
+**`@Bean` is method-level** — on a **method**, not on a class. The **return value** becomes the bean. It does **not** replace `@Service` on a type.
+
+`@Component` on `PaymentConfig` **also** registers those `@Bean` methods if the class is scanned (`@Configuration` is itself a `@Component`). Prefer **`@Configuration`** (full mode). `@Component` + `@Bean` is **lite** mode:
+
+| | `@Configuration` | `@Component` + `@Bean` |
+|---|---|---|
+| `@Bean` methods registered | Yes | Yes |
+| One `@Bean` method calls another in the **same** class | Same **singleton** from the container | Plain Java `new` → extra instance |
+
 **`@Import`** — `PaymentConfig` is **not** in the scanned package:
 
 ```java
@@ -197,7 +206,7 @@ Same as internals demo: conditions decide whether the `@Bean` is created.
 | `@Repository` | Persistence; extra exception translation |
 | `@Controller` / `@RestController` | Web layer |
 | `@Configuration` | This class can declare `@Bean` methods |
-| `@Bean` | Method **return value** is a bean |
+| `@Bean` | **Method-level** — method **return value** is a bean (not a class annotation) |
 | `@Import` | Load another config class **without** scanning that package |
 
 `@Service` / `@Repository` / `@Controller` = `@Component` + extra meaning. Scan still required.
