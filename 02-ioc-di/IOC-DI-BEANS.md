@@ -76,11 +76,11 @@ public OrderService(Order order) {   // 1 constructor → @Autowired optional
 }
 ```
 
-| | |
-|---|---|
-| + | Resolved at construction; **no NPE** if required deps missing → fail fast |
-| + | All required deps present; **immutable** (`final`) |
-| + | One constructor → `@Autowired` **not** required |
+| |                                                                                 |
+|---|---------------------------------------------------------------------------------|
+| + | Resolved at construction; **no NPE** if required dependency missing → fail fast |
+| + | All required dependency present; **immutable** (`final`)                              |
+| + | One constructor → `@Autowired` **not** required                                 |
 
 **Interview:** constructor = required deps; setter = optional; field = avoid in new code.
 
