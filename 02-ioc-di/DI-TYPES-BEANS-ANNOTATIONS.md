@@ -165,7 +165,22 @@ public class PaymentConfig {
 }
 ```
 
-**`@Bean` is method-level** — on a **method**, not on a class. The **return value** becomes the bean. It does **not** replace `@Service` on a type.
+Yes. **`@Bean` is a method-level annotation.** It goes on a **method**, not on a class.
+
+The **return value** of that method is registered as a bean.
+
+```java
+@Configuration
+public class PaymentConfig {
+
+    @Bean                              // method
+    public PaymentClient paymentClient() {
+        return new StripeClient();    // this object becomes the bean
+    }
+}
+```
+
+The **class** is `@Configuration` (or `@Component` in lite mode). **`@Bean` never replaces `@Service` on a type** — that would be `@Component` / `@Service` on the **class**.
 
 `@Component` on `PaymentConfig` **also** registers those `@Bean` methods if the class is scanned (`@Configuration` is itself a `@Component`). Prefer **`@Configuration`** (full mode). `@Component` + `@Bean` is **lite** mode:
 
