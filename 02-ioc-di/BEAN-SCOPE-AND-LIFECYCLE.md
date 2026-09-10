@@ -4,6 +4,69 @@
 
 ---
 
+## End-to-end picture (memorize this)
+
+**Born in `run()` → `refresh()`. Die on `close()` / JVM shutdown — not inside `run()`.**
+
+```text
+SpringApplication.run()
+│
+├─ 1. Deduce WebApplicationType (NONE / SERVLET / REACTIVE)
+├─ 2. ApplicationContextFactory.create(type)     → ConfigurableApplicationContext
+├─ 3. Prepare Environment (profiles, yaml, env)
+│
+├─ 4. refresh()                          ★ beans are BORN here
+│     ApplicationContext
+│         └── DefaultListableBeanFactory
+│                 └── AbstractAutowireCapableBeanFactory
+│                         for each singleton:
+│                           doCreateBean()
+│                             4a. createBeanInstance()     ctor
+│                             4b. populateBean()            DI (@Autowired)
+│                             4c. initializeBean()
+│                                   Aware interfaces
+│                                   BeanPostProcessor.beforeInit
+│                                   @PostConstruct
+│                                   BeanPostProcessor.afterInit  (AOP proxy)
+│                             put in singleton cache  → READY
+│
+├─ 5. Start embedded server (Tomcat) if SERVLET
+├─ 6. ApplicationRunner / CommandLineRunner     ← after ALL singletons ready
+└─ return context
+        │
+        ─ ─ ─ run() has finished ─ ─ ─
+        │
+        7. ctx.close()  or  JVM shutdown hook
+              @PreDestroy   ★ beans DIE here (singletons only)
+```
+
+```mermaid
+flowchart TB
+  RUN["SpringApplication.run()"]
+  RUN --> T["1–3 type + factory + Environment"]
+  RUN --> R["4. refresh()"]
+  R --> BF["DefaultListableBeanFactory"]
+  BF --> DCB["doCreateBean per singleton"]
+  DCB --> C["ctor"]
+  C --> D["DI"]
+  D --> P["@PostConstruct"]
+  P --> READY["READY in singleton cache"]
+  RUN --> S["5. Tomcat if web"]
+  RUN --> AR["6. ApplicationRunner"]
+  AR --> RET["return context"]
+  RET --> X["7. close / shutdown"]
+  X --> PD["@PreDestroy"]
+```
+
+| Step | Inside `run()`? | What |
+|---|---|---|
+| 1–3 | Yes | Type, context, environment |
+| **4 `refresh()`** | **Yes** | **ctor → inject → `@PostConstruct`** for singletons |
+| 5–6 | Yes | Server, runners |
+| **7 destroy** | **No** | **`@PreDestroy`** on close / Ctrl+C |
+
+---
+
 ## 1. Scope — how many instances?
 
 | Scope | Meaning | Typical use |
