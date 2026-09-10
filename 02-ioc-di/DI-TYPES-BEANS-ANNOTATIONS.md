@@ -143,6 +143,47 @@ Same `PaymentClient` — three doors. **Scan vs `@Bean` vs import.**
 
 If `PaymentClient` has **no** stereotype and **no** `@Bean` → nothing to inject → startup fail.
 
+**Stereotype + scan** — your class, under the main package (or a subpackage):
+
+```java
+@Service   // or @Component
+public class StripePaymentClient implements PaymentClient { ... }
+
+@SpringBootApplication   // includes @ComponentScan
+public class Application { ... }
+```
+
+**`@Configuration` + `@Bean`** — library class you cannot annotate, or you need `new` + setup:
+
+```java
+@Configuration
+public class PaymentConfig {
+    @Bean
+    public PaymentClient paymentClient() {
+        return new StripeSdkClient(apiKey);  // 3rd-party type
+    }
+}
+```
+
+**`@Import`** — `PaymentConfig` is **not** in the scanned package:
+
+```java
+@SpringBootApplication
+@Import(PaymentConfig.class)   // loads @Bean methods on PaymentConfig
+public class Application { ... }
+```
+
+If `PaymentConfig` **is** already under the main package, scan picks it up — `@Import` not needed.
+
+**Auto-config** — listed in `AutoConfiguration.imports`, not scanned:
+
+```text
+META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+    → com.example.GreetAutoConfiguration
+```
+
+Same as internals demo: conditions decide whether the `@Bean` is created.
+
 ---
 
 ## 3. Annotations (what to say in KT)
