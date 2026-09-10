@@ -232,6 +232,14 @@ Same as internals demo: conditions decide whether the `@Bean` is created.
 
 **`@Autowired` vs `@Inject`:** both wire by type. Boot apps usually use **`@Autowired`**. `@Inject` is the standard; Spring supports it. Same constructor/setter/field rules: **one constructor** still works **without** either annotation.
 
+| Aspect | `@Autowired` | `@Inject` |
+|---|---|---|
+| Origin | Spring Framework | JSR-330 (Java standard) |
+| Package | `org.springframework.beans.factory.annotation` | `javax.inject` (Boot 3: `jakarta.inject`) |
+| Options | `required`, `@Qualifier` | None (simpler) |
+| Portability | Spring-only | Works across DI frameworks |
+| Best use | Spring Boot projects | Cross-framework portability |
+
 **Interview note**
 
 - If asked in a **Spring Boot interview**, emphasize that `@Autowired` is richer and more flexible because it integrates tightly with Spring’s ecosystem.
