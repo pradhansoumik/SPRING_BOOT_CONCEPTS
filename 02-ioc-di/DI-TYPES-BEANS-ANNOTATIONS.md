@@ -232,6 +232,12 @@ Same as internals demo: conditions decide whether the `@Bean` is created.
 
 **`@Autowired` vs `@Inject`:** both wire by type. Boot apps usually use **`@Autowired`**. `@Inject` is the standard; Spring supports it. Same constructor/setter/field rules: **one constructor** still works **without** either annotation.
 
+**Interview note**
+
+- If asked in a **Spring Boot interview**, emphasize that `@Autowired` is richer and more flexible because it integrates tightly with Spring’s ecosystem.
+- If asked in a **Java design interview**, highlight that `@Inject` is standard and portable, making code less framework-dependent.
+- In practice, both work in Spring Boot, but most teams prefer `@Autowired` for its extra features.
+
 **`@Import` vs `@Autowired`:** `@Import` brings a **config class** into the context. `@Autowired` fills a **field/ctor** with an existing bean. Not interchangeable.
 
 ### Optional extras
