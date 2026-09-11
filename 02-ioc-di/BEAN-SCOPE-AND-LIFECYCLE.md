@@ -4,6 +4,71 @@
 
 ---
 
+## High-level flow
+
+Boxes on the right = **`run()` / `refresh()` / `close()`**.
+
+```text
+ run()
+ ┌─────────────────────────────────────────────────────────────┐
+ │  Application starts                                         │
+ │  Container created          (ApplicationContext)            │
+ │  Container reads configuration  (scan, @Bean, auto-config)  │
+ │                                                             │
+ │   refresh()                                                 │
+ │   ┌───────────────────────────────────────────────────────┐ │
+ │   │  Bean definitions created & loaded                    │ │
+ │   │  BeanFactoryPostProcessor (modify definitions)        │ │
+ │   │  Beans created            (constructor)               │ │
+ │   │  Beans configured & assembled  (DI)                   │ │
+ │   │  BeanPostProcessor  before initialization             │ │
+ │   │  @PostConstruct                                         │ │
+ │   │  BeanPostProcessor  after initialization  (AOP proxy) │ │
+ │   └───────────────────────────────────────────────────────┘ │
+ │  Application runs           (runners, Tomcat, traffic)      │
+ └─────────────────────────────────────────────────────────────┘
+
+ close() / shutdown hook     ← not inside run()
+ ┌─────────────────────────────────────────────────────────────┐
+ │  Application shut down                                      │
+ │  Spring context closed                                      │
+ │  @PreDestroy                                                │
+ └─────────────────────────────────────────────────────────────┘
+```
+
+```mermaid
+flowchart TB
+  subgraph RUN["run()"]
+    A["Application starts"] --> B["Container created"]
+    B --> C["Container reads configuration"]
+    subgraph REF["refresh()"]
+      D["Bean definitions created & loaded"]
+      D --> E["BeanFactoryPostProcessor"]
+      E --> F["Beans created"]
+      F --> G["Configured & assembled — DI"]
+      G --> H["BPP before init"]
+      H --> I["@PostConstruct"]
+      I --> J["BPP after init"]
+    end
+    C --> D
+    J --> K["Application runs"]
+  end
+  K --> L["Application shut down"]
+  subgraph CLS["close() / shutdown"]
+    L --> M["Spring context closed"]
+    M --> N["@PreDestroy"]
+  end
+```
+
+| Stage | Happens in |
+|---|---|
+| Start, container, read config | **`run()`** (then into `refresh()`) |
+| Definitions → BFPP → create → DI → BPP → `@PostConstruct` → BPP | **`refresh()`** inside **`run()`** |
+| Application runs | End of **`run()`**, then process stays up |
+| Shutdown, `close()`, `@PreDestroy` | **`close()`** / hook — **not** inside `run()` |
+
+---
+
 ## End-to-end picture (memorize this)
 
 **Born in `run()` → `refresh()`. Die on `close()` / JVM shutdown — not inside `run()`.**
@@ -87,7 +152,7 @@ public class Cart { }
 
 ### Prototype scenario (short)
 
-`refresh()` stores only the **recipe** for `Cart`. `new Cart()` runs on **`getBean(Cart)`** (or inject), not with the singletons.
+`refresh()` stores only the **recipe** (Register the Bean Definition) for `Cart`. `new Cart()` runs on **`getBean(Cart)`** (or inject), not with the singletons.
 
 ```text
 refresh()     OrderService created     Cart?  no
@@ -117,13 +182,42 @@ public void add(String item) {
 }
 ```
 
-(`@Lookup` does the same: method → `getBean(Cart.class)`.)
+**`@Lookup`** — Spring implements this as `getBean(Cart.class)`:
+
+```java
+@Service
+public abstract class OrderService {
+
+    @Lookup
+    protected abstract Cart createCart();
+
+    public void add(String item) {
+        createCart().add(item);             // NEW Cart each call
+    }
+}
+```
 
 | | Prototype |
 |---|---|
 | Created | On demand, not in `refresh()` with singletons |
 | `@PreDestroy` | **Not** called by `close()` — **you** own the instance |
 | Into a singleton | Snapshot — use `ObjectProvider` / `@Lookup` |
+
+
+If nothing **injects** it and nobody calls **`getBean`**, Spring only **registers the definition**. No instance is ever created.
+
+There is no `@Prototype` — use `@Scope("prototype")`.
+
+**When we actually need it (real time)** — object must be **Spring-managed** (DI / AOP) **and** must **not share mutable state**:
+
+| Use case | Why not singleton |
+|---|---|
+| **Shopping cart** (items list) | One cart would mix users |
+| **Wizard / multi-step form** | Each user/session has its own fields |
+| **Per-run job** (`ReportJob` + file path) | Each run its own state |
+| **Not thread-safe client** you cannot rewrite | New instance per use |
+
+Most Boot APIs: **stateless `@Service` = singleton**. Per HTTP request → `@Scope("request")`. Per-call data → local variable / DTO, not a bean.
 
 ---
 
@@ -192,12 +286,20 @@ Only for **singletons** the container tracks.
 
 **`ctx.close()` is not mandatory** in a normal Boot app. Boot registers a **JVM shutdown hook**. Ctrl+C / SIGTERM / stop process → hook → `close()` → `@PreDestroy`.
 
-| | |
+| How it stops | `@PreDestroy` |
 |---|---|
-| Production web app | Do **not** `close()` in `main` (that would shut the app down) |
-| Demo | May `close()` so `@PreDestroy` prints in the **same** run |
-| Without `close()` in `main` | `@PreDestroy` **still runs** on normal shutdown |
-| `kill -9` / crash | Hook does **not** run → no `@PreDestroy` |
+| Production web app — do **not** `close()` in `main` | Hook on process stop |
+| Demo may `close()` | Yes — same run |
+| Without `close()` in `main` | **Yes** on normal shutdown |
+| Ctrl+C / `SIGTERM` (`kubectl delete`, rolling update) | **Yes** (grace period, then SIGKILL if too slow) |
+| `System.exit(n)` | **Yes** — normal JVM shutdown, hook runs |
+| `SpringApplication.exit(ctx)` | **Yes** — Boot closes, then exit |
+| `Runtime.halt()` / `kill -9` | **No** |
+| **Pod `OOMKilled`** | **No** — cgroup **SIGKILL**, like `kill -9` |
+| JVM `OutOfMemoryError` (process still up) | **Unreliable** — JVM already sick |
+
+Pod OOM: **no** SIGTERM first. Don’t rely on `@PreDestroy` to flush critical data.
+`@PreDestroy` = polite goodbye on deploy/stop. Not a crash-recovery or OOM safety net.
 
 ---
 
