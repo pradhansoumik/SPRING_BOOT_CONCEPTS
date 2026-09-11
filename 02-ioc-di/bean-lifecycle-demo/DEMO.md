@@ -10,6 +10,28 @@ No web server. `main` **closes** the context so `@PreDestroy` prints in the same
 
 ---
 
+## Actual flow (this demo)
+
+```text
+main()
+  run()
+    refresh()                          ★ singletons born
+      LifecycleBean     ctor → @PostConstruct     (prints 1 then 2)
+      OrderService
+      ScopeInspector    created only — run() NOT called yet
+      + Boot’s own beans (Environment, etc. — you didn’t write them)
+    ScopeInspector.run()               ★ after ALL singletons READY
+      getBean(OrderService) × 2  → same object → true
+      getBean(Cart) × 2           → new each time (prototype) → false
+  return ctx
+  ctx.close()                          ★ not inside run()
+    LifecycleBean @PreDestroy           (prints 3)
+```
+
+`Cart` is **not** created in `refresh()` — only when `getBean(Cart)` runs. Prototype has **no** container `@PreDestroy`.
+
+---
+
 ## What to watch
 
 **Lifecycle** (`LifecycleBean` — singleton):
