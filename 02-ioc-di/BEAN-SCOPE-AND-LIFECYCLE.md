@@ -47,7 +47,7 @@ flowchart TB
       E --> F["Beans created"]
       F --> G["Configured & assembled — DI"]
       G --> H["BPP before init"]
-      H --> I["@PostConstruct (after objects are created by container & before going to give the object t use/call business function - if we want to perform some checks)"]
+      H --> I["@PostConstruct"]
       I --> J["BPP after init"]
     end
     C --> D
