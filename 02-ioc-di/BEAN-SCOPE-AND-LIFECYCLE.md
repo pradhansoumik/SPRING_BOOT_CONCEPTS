@@ -47,7 +47,7 @@ flowchart TB
   RUN --> R["4. refresh()"]
   R --> BF["DefaultListableBeanFactory"]
   BF --> DCB["doCreateBean per singleton"]
-  DCB --> C["ctor"]
+  DCB --> C["constructor"]
   C --> D["DI"]
   D --> P["@PostConstruct"]
   P --> READY["READY in singleton cache"]
@@ -85,10 +85,45 @@ public class OrderService { }
 public class Cart { }
 ```
 
-**Interview traps**
+### Prototype scenario (short)
 
-- Injecting **prototype into singleton**: the singleton gets **one** prototype at creation time — not a new one per call. Fix: `ObjectProvider<Cart>` / `@Lookup`.
-- **Prototype `@PreDestroy` is not called** by the container (you own that instance).
+`refresh()` stores only the **recipe** for `Cart`. `new Cart()` runs on **`getBean(Cart)`** (or inject), not with the singletons.
+
+```text
+refresh()     OrderService created     Cart?  no
+getBean()     new Cart()               each call → new object
+close()       OrderService @PreDestroy Cart?  no — container forgot it
+```
+
+**Trap — inject prototype into singleton**
+
+```java
+@Service
+public class OrderService {
+    private final Cart cart;                 // ONE Cart, forever
+    public OrderService(Cart cart) { this.cart = cart; }
+}
+```
+
+Injection runs **once** (when `OrderService` is created). Every request shares that cart.
+
+**Fix — ask each time**
+
+```java
+private final ObjectProvider<Cart> carts;
+
+public void add(String item) {
+    carts.getObject().add(item);            // NEW Cart each call
+}
+```
+
+(`@Lookup` does the same: method → `getBean(Cart.class)`.)
+
+| | Prototype |
+|---|---|
+| Created | On demand, not in `refresh()` with singletons |
+| `@PreDestroy` | **Not** called by `close()` — **you** own the instance |
+| Into a singleton | Snapshot — use `ObjectProvider` / `@Lookup` |
 
 ---
 
@@ -105,7 +140,7 @@ instantiate (ctor)
     → @PreDestroy  /  DisposableBean.destroy()  /  destroy-method
 ```
 
-**You usually write only:** ctor + DI + `@PostConstruct` / `@PreDestroy`.
+**You usually write only:** constructor + DI + `@PostConstruct` / `@PreDestroy`.
 
 ---
 
