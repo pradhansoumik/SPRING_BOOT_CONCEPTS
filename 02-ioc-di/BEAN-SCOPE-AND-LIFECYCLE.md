@@ -184,11 +184,20 @@ Singleton cache: after create, instance lives in the factory map. **Prototype** 
 
 ## 4. Destroy
 
-`refresh()` finished → bean in use. On `context.close()` / JVM shutdown hook:
+`refresh()` finished → bean in use. Destroy runs **during** `close()`, not before you call it and not after `close()` returns.
 
 `DisposableBeanAdapter` → `@PreDestroy` → `DisposableBean.destroy()` → `destroy-method`.
 
 Only for **singletons** the container tracks.
+
+**`ctx.close()` is not mandatory** in a normal Boot app. Boot registers a **JVM shutdown hook**. Ctrl+C / SIGTERM / stop process → hook → `close()` → `@PreDestroy`.
+
+| | |
+|---|---|
+| Production web app | Do **not** `close()` in `main` (that would shut the app down) |
+| Demo | May `close()` so `@PreDestroy` prints in the **same** run |
+| Without `close()` in `main` | `@PreDestroy` **still runs** on normal shutdown |
+| `kill -9` / crash | Hook does **not** run → no `@PreDestroy` |
 
 ---
 

@@ -6,7 +6,9 @@
 mvn -f 02-ioc-di/bean-lifecycle-demo/pom.xml spring-boot:run
 ```
 
-No web server. `main` **closes** the context so `@PreDestroy` prints in the same run.
+No web server.
+
+**`ctx.close()` is not required** for `@PreDestroy`. Boot’s shutdown hook runs it on Ctrl+C. The demo may call `close()` only so print `3` appears in the same run. Without `close()`, stop the process to see `@PreDestroy`. `kill -9` skips it.
 
 ---
 
@@ -24,7 +26,7 @@ main()
       getBean(OrderService) × 2  → same object → true
       getBean(Cart) × 2           → new each time (prototype) → false
   return ctx
-  ctx.close()                          ★ not inside run()
+  ctx.close()  OR  Ctrl+C (shutdown hook)   ★ not inside run()
     LifecycleBean @PreDestroy           (prints 3)
 ```
 
@@ -40,7 +42,7 @@ main()
 1. ctor
 2. @PostConstruct
    ... scopes block ...
-3. @PreDestroy          ← after ctx.close()
+3. @PreDestroy          ← during close() or shutdown hook
 ```
 
 **Scopes:**
