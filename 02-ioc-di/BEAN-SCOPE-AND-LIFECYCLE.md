@@ -21,7 +21,7 @@ SpringApplication.run()
 │                 └── AbstractAutowireCapableBeanFactory
 │                         for each singleton:
 │                           doCreateBean()
-│                             4a. createBeanInstance()     ctor
+│                             4a. createBeanInstance()      constructor
 │                             4b. populateBean()            DI (@Autowired)
 │                             4c. initializeBean()
 │                                   Aware interfaces
@@ -61,7 +61,7 @@ flowchart TB
 | Step | Inside `run()`? | What |
 |---|---|---|
 | 1–3 | Yes | Type, context, environment |
-| **4 `refresh()`** | **Yes** | **ctor → inject → `@PostConstruct`** for singletons |
+| **4 `refresh()`** | **Yes** | **constructor → inject → `@PostConstruct`** for singletons |
 | 5–6 | Yes | Server, runners |
 | **7 destroy** | **No** | **`@PreDestroy`** on close / Ctrl+C |
 
@@ -162,7 +162,7 @@ flowchart TB
   CTX --> BF
   BF --> AACBF
   AACBF --> DCB["doCreateBean()"]
-  DCB --> CBI["createBeanInstance()  — ctor"]
+  DCB --> CBI["createBeanInstance()  — constructor"]
   DCB --> PB["populateBean()  — DI"]
   DCB --> IB["initializeBean()"]
   IB --> AW["Aware interfaces"]
