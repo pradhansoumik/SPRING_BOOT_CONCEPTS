@@ -71,40 +71,38 @@ flowchart TB
           `@PreDestroy` = before application context destroys & after objects have performed all the business function execution - if we want to perform some cleanup or close the resources.
 ---
 
-## End-to-end picture (memorize this)
+## End-to-end picture (same flow — Boot steps & class names)
 
-**Born in `run()` → `refresh()`. Die on `close()` / JVM shutdown — not inside `run()`.**
+Detail of the High-level boxes. **Born in `refresh()`. Die in `close()`.**
 
 ```text
 SpringApplication.run()
 │
 ├─ 1. Deduce WebApplicationType (NONE / SERVLET / REACTIVE)
-├─ 2. ApplicationContextFactory.create(type)     → ConfigurableApplicationContext
+├─ 2. ApplicationContextFactory.create(type)     → container created
 ├─ 3. Prepare Environment (profiles, yaml, env)
 │
-├─ 4. refresh()                          ★ beans are BORN here
-│     ApplicationContext
-│         └── DefaultListableBeanFactory
-│                 └── AbstractAutowireCapableBeanFactory
-│                         for each singleton:
-│                           doCreateBean()
-│                             4a. createBeanInstance()      constructor
-│                             4b. populateBean()            DI (@Autowired)
-│                             4c. initializeBean()
-│                                   Aware interfaces
-│                                   BeanPostProcessor.beforeInit
-│                                   @PostConstruct
-│                                   BeanPostProcessor.afterInit  (AOP proxy)
-│                             put in singleton cache  → READY
+├─ 4. refresh()
+│     load bean definitions (scan, @Bean, auto-config)
+│     BeanFactoryPostProcessor     ← modify definitions (not the instances)
+│     then for each singleton:
+│         DefaultListableBeanFactory
+│           └── AbstractAutowireCapableBeanFactory.doCreateBean()
+│                 4a. createBeanInstance()      constructor   = Beans created
+│                 4b. populateBean()            DI            = assembled
+│                 4c. initializeBean()
+│                       BeanPostProcessor.beforeInit
+│                       @PostConstruct
+│                       BeanPostProcessor.afterInit  (AOP proxy)
+│                 singleton cache → READY
 │
-├─ 5. Start embedded server (Tomcat) if SERVLET
-├─ 6. ApplicationRunner / CommandLineRunner     ← after ALL singletons ready
+├─ 5–6. Application runs — Tomcat (if web), ApplicationRunner
 └─ return context
         │
         ─ ─ ─ run() has finished ─ ─ ─
         │
-        7. ctx.close()  or  JVM shutdown hook
-              @PreDestroy   ★ beans DIE here (singletons only)
+        7. close() / shutdown hook
+              @PreDestroy
 ```
 
 ```mermaid
@@ -112,15 +110,17 @@ flowchart TB
   RUN["SpringApplication.run()"]
   RUN --> T["1–3 type + factory + Environment"]
   RUN --> R["4. refresh()"]
-  R --> BF["DefaultListableBeanFactory"]
-  BF --> DCB["doCreateBean per singleton"]
+  R --> DEF["load bean definitions"]
+  DEF --> BFPP["BeanFactoryPostProcessor"]
+  BFPP --> DCB["doCreateBean per singleton"]
   DCB --> C["constructor"]
   C --> D["DI"]
-  D --> P["@PostConstruct"]
-  P --> READY["READY in singleton cache"]
-  RUN --> S["5. Tomcat if web"]
-  RUN --> AR["6. ApplicationRunner"]
-  AR --> RET["return context"]
+  D --> B1["BPP before init"]
+  B1 --> P["@PostConstruct"]
+  P --> B2["BPP after init"]
+  B2 --> READY["READY in singleton cache"]
+  RUN --> APP["5–6 Application runs — Tomcat, runners"]
+  APP --> RET["return context"]
   RET --> X["7. close / shutdown"]
   X --> PD["@PreDestroy"]
 ```
@@ -128,8 +128,8 @@ flowchart TB
 | Step | Inside `run()`? | What |
 |---|---|---|
 | 1–3 | Yes | Type, context, environment |
-| **4 `refresh()`** | **Yes** | **constructor → inject → `@PostConstruct`** for singletons |
-| 5–6 | Yes | Server, runners |
+| **4 `refresh()`** | **Yes** | Definitions → BFPP → constructor → DI → `@PostConstruct` |
+| 5–6 | Yes | Server, runners — app runs |
 | **7 destroy** | **No** | **`@PreDestroy`** on close / Ctrl+C |
 
 ---
@@ -225,15 +225,18 @@ Most Boot APIs: **stateless `@Service` = singleton**. Per HTTP request → `@Sco
 
 ## 2. Lifecycle — what happens to one bean
 
+This is the **inner `refresh()` strip** from High-level (create → assemble → BPP → `@PostConstruct` → BPP).  
+**BeanFactoryPostProcessor is not here** — it runs **once** on **definitions**, before any of these instances exist.
+
 ```text
-instantiate (ctor)
+instantiate (constructor)
     → inject deps (populate)
     → Aware callbacks (BeanNameAware, ApplicationContextAware, …)
     → BeanPostProcessor.beforeInit
     → @PostConstruct  /  InitializingBean.afterPropertiesSet()  /  init-method
     → BeanPostProcessor.afterInit   ← AOP proxies often wrap here
-    → READY (in use)
-    → @PreDestroy  /  DisposableBean.destroy()  /  destroy-method
+    → READY (in use)                ← High-level “Application runs”
+    → @PreDestroy                   ← High-level close() box
 ```
 
 **You usually write only:** constructor + DI + `@PostConstruct` / `@PreDestroy`.
@@ -267,12 +270,13 @@ flowchart TB
   IB --> BPP2["BeanPostProcessor.afterInit  — proxy"]
 ```
 
-| Class | Role |
-|---|---|
-| `ApplicationContext` | IoC facade (`run()` returns this) |
-| `DefaultListableBeanFactory` | Holds bean **definitions** + singleton **cache** |
-| `AbstractAutowireCapableBeanFactory` | **Creates** beans (`doCreateBean`) |
-| `BeanPostProcessor` | Hook around init (AOP, `@Autowired` processing, etc.) |
+| Class | Role | High-level step |
+|---|---|---|
+| `ApplicationContext` | IoC facade (`run()` returns this) | Container created |
+| `DefaultListableBeanFactory` | Bean **definitions** + singleton **cache** | Definitions loaded |
+| `BeanFactoryPostProcessor` | Change definitions **before** instances | BFPP box |
+| `AbstractAutowireCapableBeanFactory` | **Creates** beans (`doCreateBean`) | Beans created / assembled |
+| `BeanPostProcessor` | Around init (AOP, extra setup) | BPP before / after |
 
 Singleton cache: after create, instance lives in the factory map. **Prototype** is not stored there.
 
@@ -280,7 +284,7 @@ Singleton cache: after create, instance lives in the factory map. **Prototype** 
 
 ## 4. Destroy
 
-`refresh()` finished → bean in use. Destroy runs **during** `close()`, not before you call it and not after `close()` returns.
+This is the High-level **`close()`** box. `refresh()` finished → bean in use. Destroy runs **during** `close()`, not before you call it and not after `close()` returns.
 
 `DisposableBeanAdapter` → `@PreDestroy` → `DisposableBean.destroy()` → `destroy-method`.
 
