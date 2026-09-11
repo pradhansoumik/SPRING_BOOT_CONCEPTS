@@ -1,0 +1,5 @@
+app:
+  payment:
+    url: http://localhost:9999
+  feature:
+    fake-payment: true

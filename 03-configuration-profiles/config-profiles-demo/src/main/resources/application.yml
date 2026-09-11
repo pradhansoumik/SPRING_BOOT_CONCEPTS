@@ -1,0 +1,6 @@
+app:
+  payment:
+    url: http://default-pay
+    timeout: 5s
+  feature:
+    fake-payment: false
