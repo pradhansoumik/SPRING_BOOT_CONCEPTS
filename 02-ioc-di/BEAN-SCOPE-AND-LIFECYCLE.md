@@ -67,6 +67,8 @@ flowchart TB
 | Application runs | End of **`run()`**, then process stays up |
 | Shutdown, `close()`, `@PreDestroy` | **`close()`** / hook — **not** inside `run()` |
 
+>> Note: `@PostConstruct` =  after objects are created by container & before going to give the object t use/call business function - if we want to perform some checks.
+          `@PreDestroy` = before application context destroys & after objects have performed all the business function execution - if we want to perform some cleanup or close the resources.
 ---
 
 ## End-to-end picture (memorize this)
