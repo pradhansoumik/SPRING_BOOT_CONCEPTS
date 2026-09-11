@@ -203,7 +203,7 @@ Same as internals demo: conditions decide whether the `@Bean` is created.
 
 ---
 
-## 3. Annotations (what to say in KT)
+## 3. Annotations
 
 ### Register beans
 
@@ -248,6 +248,39 @@ Same as internals demo: conditions decide whether the `@Bean` is created.
 
 **`@Import` vs `@Autowired`:** `@Import` brings a **config class** into the context. `@Autowired` fills a **field/ctor** with an existing bean. Not interchangeable.
 
+### `@Primary` vs `@Qualifier`
+
+Two beans of the **same type** → Spring does not know which to inject → startup fails (`NoUniqueBeanDefinitionException`).
+
+```java
+@Component
+@Primary
+class StripeClient implements PaymentClient { }
+
+@Component
+@Qualifier("paypal")
+class PaypalClient implements PaymentClient { }
+
+@Service
+public class OrderService {
+    public OrderService(@Qualifier("paypal") PaymentClient payment) { ... }
+    // no @Qualifier → gets Stripe (@Primary)
+}
+```
+
+| | |
+|---|---|
+| `@Primary` | Default when you inject **by type only** |
+| `@Qualifier("paypal")` | **You pick** that bean; wins over `@Primary` |
+
+### `@Lazy` & circular dependency
+
+`@Lazy` = inject a **proxy**; real singleton is created on **first use**. Not `required = false` (optional/missing). Not prototype (new each time).
+
+**Circular constructors** (`A` needs `B`, `B` needs `A`) → fail (Boot 2.6+ cycles off by default). `@Lazy` on one injection breaks the cycle — **last resort**; fix the design if you can.
+
+**Also:** heavy/rare bean (`@Lazy ReportEngine`) so startup stays fast. Don’t set global `spring.main.lazy-initialization=true` on a public API (errors hide until first request).
+
 ### Optional extras
 
 | Annotation | Meaning |
@@ -257,13 +290,7 @@ Same as internals demo: conditions decide whether the `@Bean` is created.
 
 ---
 
-## 4. Tiny snippets (`@Qualifier` / `@Bean`)
-
-Two payment beans — pick one:
-
-```java
-public OrderService(@Qualifier("paypal") PaymentClient payment) { ... }
-```
+## 4. Tiny snippets (`@Bean`)
 
 `@Bean` when you cannot put `@Component` on a library class:
 

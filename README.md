@@ -35,3 +35,5 @@ All internals notes + demo live in **`01-fundamentals/spring-boot-internals/`**.
 | DI types, beans & annotations (KT) | [`02-ioc-di/DI-TYPES-BEANS-ANNOTATIONS.md`](02-ioc-di/DI-TYPES-BEANS-ANNOTATIONS.md) |
 | Bean scope & lifecycle | [`02-ioc-di/BEAN-SCOPE-AND-LIFECYCLE.md`](02-ioc-di/BEAN-SCOPE-AND-LIFECYCLE.md) |
 | Bean scope & lifecycle **demo** | [`02-ioc-di/bean-lifecycle-demo/DEMO.md`](02-ioc-di/bean-lifecycle-demo/DEMO.md) |
+
+`@Primary` / `@Qualifier` / `@Lazy` → KT doc. `request` / `session` → scope & lifecycle doc.

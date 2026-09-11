@@ -135,6 +135,8 @@ instantiate → inject deps → @PostConstruct → ready → use → @PreDestroy
 
 `@Qualifier` wins when you name it; `@Primary` is the fallback.
 
+**KT detail + snippets:** [`DI-TYPES-BEANS-ANNOTATIONS.md`](DI-TYPES-BEANS-ANNOTATIONS.md) — `@Primary` vs `@Qualifier`.
+
 ---
 
 ## 8. Circular dependency → `@Lazy`
@@ -146,6 +148,8 @@ A needs B, B needs A
 Constructor cycle → **fail** (Boot 2.6+ circular refs **off** by default).
 
 `@Lazy` on one injection → inject a **proxy**, break the cycle (code smell; fix the design if you can).
+
+**KT detail:** [`DI-TYPES-BEANS-ANNOTATIONS.md`](DI-TYPES-BEANS-ANNOTATIONS.md) — `@Lazy` & circular dependency.
 
 ---
 

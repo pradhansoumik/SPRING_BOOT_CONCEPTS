@@ -152,6 +152,25 @@ public class OrderService { }
 public class Cart { }
 ```
 
+### `request` / `session` (web only)
+
+Need `spring-boot-starter-web`. **Not** available in the lifecycle demo (no Tomcat).
+
+| Scope | One instance per |
+|---|---|
+| **request** | HTTP request (then discarded) |
+| **session** | HTTP session (same user/browser until session ends) |
+
+```java
+@Component
+@Scope("request")
+public class RequestAudit { }   // new object each HTTP call
+```
+
+Vs **prototype**: new on every `getBean`, even **inside** the same request. Vs **singleton**: one for the whole app.
+
+Injecting `request` into a **singleton** has the same snapshot problem as prototype — use a proxy: `@Scope(value = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)` or look up per call.
+
 ### Prototype scenario (short)
 
 `refresh()` stores only the **recipe** (Register the Bean Definition) for `Cart`. `new Cart()` runs on **`getBean(Cart)`** (or inject), not with the singletons.
