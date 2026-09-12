@@ -11,8 +11,8 @@ Interview notes, diagrams, and (later) small demos for Spring Boot.
 | 01 | **Spring Boot Internals** | ✅ Notes |
 | 02 | **IoC, DI & Beans** | ✅ Notes |
 | 03 | **Configuration & Profiles** | ✅ Notes |
-| 04 | Web Layer (MVC) | ⏳ Next |
-| 05 | Data JPA & `@Transactional` | ⏳ |
+| 04 | **Web Layer (MVC)** | ✅ Notes |
+| 05 | Data JPA & `@Transactional` | ⏳ Next |
 | 06 | Security (Boot wiring) | ⏳ |
 | 07 | Cross-cutting & Ops | ⏳ |
 
@@ -44,3 +44,10 @@ All internals notes + demo live in **`01-fundamentals/spring-boot-internals/`**.
 |---|---|
 | Config & profiles | [`03-configuration-profiles/CONFIG-AND-PROFILES.md`](03-configuration-profiles/CONFIG-AND-PROFILES.md) |
 | Config & profiles **demo** | [`03-configuration-profiles/config-profiles-demo/DEMO.md`](03-configuration-profiles/config-profiles-demo/DEMO.md) |
+
+## 04 — Web Layer (MVC)
+
+| Doc | Path |
+|---|---|
+| Web MVC | [`04-web-mvc/WEB-MVC.md`](04-web-mvc/WEB-MVC.md) |
+| Web MVC **demo** | [`04-web-mvc/web-mvc-demo/DEMO.md`](04-web-mvc/web-mvc-demo/DEMO.md) |
