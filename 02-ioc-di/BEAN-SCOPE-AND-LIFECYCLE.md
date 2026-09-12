@@ -22,7 +22,7 @@ Boxes on the right = **`run()` / `refresh()` / `close()`**.
  │   │  Beans created            (constructor)               │ │
  │   │  Beans configured & assembled  (DI)                   │ │
  │   │  BeanPostProcessor  before initialization             │ │
- │   │  @PostConstruct                                         │ │
+ │   │  @PostConstruct                                       │ │
  │   │  BeanPostProcessor  after initialization  (AOP proxy) │ │
  │   └───────────────────────────────────────────────────────┘ │
  │  Application runs           (runners, Tomcat, traffic)      │

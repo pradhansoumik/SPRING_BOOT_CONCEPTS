@@ -78,6 +78,27 @@ java -jar app.jar --spring.profiles.active=dev
 
 Active profile **overrides** matching keys from `application.yml`.
 
+**Scenario — `@Profile("dev")` does not load `application-dev.yml`**
+
+They both **listen** to “is `dev` active?” They do **not** trigger each other.
+
+| | What it does |
+|---|---|
+| `spring.profiles.active=dev` | **Activates** the profile |
+| `application-dev.yml` | Loaded **because** `dev` is active (file name) |
+| `@Profile("dev")` on a class | That **bean** only if `dev` is active |
+
+```text
+--spring.profiles.active=dev
+        ├── Boot loads application-dev.yml
+        └── @Profile("dev") beans are registered
+```
+
+- Only `@Profile("dev")`, profile **not** active → bean skipped; `application-dev.yml` **not** loaded.  
+- Only `spring.profiles.active=dev`, no `@Profile` → **yml still loads**; other beans unchanged.
+
+**KT line:** active profile drives the **file**. `@Profile` only **gates beans**.
+
 ---
 
 ## 3. `@Value` vs `@ConfigurationProperties`
