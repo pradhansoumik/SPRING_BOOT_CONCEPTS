@@ -35,6 +35,16 @@ app:
 | Lists / maps | Awkward | Natural |
 | Pick one | Either is fine — don’t mix both for the **same** key (surprise override) |
 
+In Spring Boot, both `.properties` and `.yaml` files are supported for externalized configuration, but the **priority order** is important.
+
+**Priority rules**
+
+- `application.properties` and `application.yml` are both valid.
+- If both exist in the **same location**, **`.properties` takes precedence over `.yaml` / `.yml`**.
+- Spring Boot’s Environment abstraction loads configuration in a defined order (called the **PropertySource** order).
+
+`.yml` and `.yaml` are both YAML. Prefer **one** format for the app so it is obvious who won.
+
 ---
 
 ## 2. Profiles
