@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 @SpringBootApplication
 @ConfigurationPropertiesScan
+//OR, @EnableConfigurationProperties(PaymentProps.class)
 public class Application {
 
     public static void main(String[] args) {

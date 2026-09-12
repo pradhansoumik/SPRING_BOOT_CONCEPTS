@@ -49,6 +49,7 @@ In Spring Boot, both `.properties` and `.yaml` files are supported for externali
 
 ## 2. Profiles
 
+A Spring Boot profile is a way to define and group environment‑specific configurations so that your application can adapt to different runtime contexts (like dev, test, staging, prod) without changing code.
 **Profile** = named Environment slice: `dev`, `prod`, `test`.
 
 | Piece | Role |
@@ -77,6 +78,9 @@ java -jar app.jar --spring.profiles.active=dev
 ```
 
 Active profile **overrides** matching keys from `application.yml`.
+
+> `dev` does not replace the whole file. It only overrides keys that exist in application-dev.yml.
+> Think merge, not swap files. Missing key in the profile file = keep the default.
 
 **Scenario — `@Profile("dev")` does not load `application-dev.yml`**
 
@@ -113,8 +117,11 @@ public class PaymentProps {    // group — prefer this
     private Duration timeout;
 }
 ```
+`@ConfigurationPropertiesScan` finds classes annotated with @ConfigurationProperties and registers them as beans, then Boot binds app.payment.* onto that instance.
 
 Need `@EnableConfigurationProperties(PaymentProps.class)` or `@ConfigurationPropertiesScan` / `@Component` on the props class.
+
+>Note: With `@ConfigurationPropertiesScan` (or `@EnableConfigurationProperties(PaymentProps.class)`), do not put @Component on PaymentProps.
 
 | | `@Value` | `@ConfigurationProperties` |
 |---|---|---|
