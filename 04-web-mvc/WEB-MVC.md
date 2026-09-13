@@ -96,6 +96,33 @@ Structured JSON (`error`, `code`) — don’t return stack traces.
 
 Both can log; **Filter** is lower; **Interceptor** knows the **Controller** method.
 
+HTTP hits the **servlet container** first. **`DispatcherServlet`** is Spring MVC’s front controller. Filter and Interceptor sit on **different sides** of that servlet.
+
+```text
+Request
+   ▼
+Filter(s)                    ← Jakarta Servlet (around the servlet)
+   ▼
+DispatcherServlet            ← Spring MVC front door
+   ▼
+Interceptor preHandle        ← Spring (only if a Controller is mapped)
+   ▼
+@Controller / @RestController
+   ▼
+Interceptor postHandle / afterCompletion
+   ▼
+Filter (on the way out)
+```
+
+| | Tied to |
+|---|---|
+| Filter | Servlet container → **around** `DispatcherServlet` |
+| Interceptor | **Inside** `DispatcherServlet` → your controller method |
+
+Filter does not know “which `@GetMapping`” unless you dig. It can also see requests that never reach a controller (depending on mapping). Interceptor runs **after** Spring has chosen the handler (`OrderController.get`).
+
+**KT line:** Filter = **outside** the dispatcher. Interceptor = **inside** it, on the way to the controller.
+
 ---
 
 ## 8. Swagger / OpenAPI
