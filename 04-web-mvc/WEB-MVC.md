@@ -47,6 +47,8 @@ Class-level `@RequestMapping("/orders")` + method `@GetMapping("/{id}")` → `GE
 ---
 
 ## 4. DTO — not the entity
+A DTO is a POJO used as a data bag across a boundary (usually JSON ↔ controller ↔ service).
+DTO = role  (transfer data)
 
 ```text
 Controller  ←DTO→  Service  ←entity→  DB
