@@ -89,6 +89,43 @@ public class ApiErrors {
 
 Structured JSON (`error`, `code`) — don’t return stack traces.
 
+**Behind the scenes** — not a proxy around the service. Throw **bubbles up**; **DispatcherServlet** routes it.
+
+```text
+OrderController / OrderService
+        throws OrderNotFoundException
+                ▼
+DispatcherServlet  (does not crash Tomcat)
+                ▼
+HandlerExceptionResolver
+  finds @ExceptionHandler on @RestControllerAdvice (ApiErrors)
+                ▼
+your method runs  →  JSON + HTTP status (404 / 400)
+                ▼
+response to client
+```
+
+1. Service throws (controller has no try/catch).  
+2. Exception returns to **DispatcherServlet**.  
+3. **HandlerExceptionResolver** (`ExceptionHandlerExceptionResolver`) looks up the exception type.  
+4. It was indexed at `refresh()` from `@RestControllerAdvice` + `@ExceptionHandler`.  
+5. **`ApiErrors.notFound(...)`** runs (normal bean method).  
+6. Status + JSON written to the client.
+
+`@Valid` fail → `MethodArgumentNotValidException` (service **not** called) → same 2–6 → **400**.
+
+No matching `@ExceptionHandler` (and no superclass match on your advice) → MVC **does not** call `ApiErrors`. Servlet error dispatch → **`GET /error`** → Boot `DefaultErrorAttributes` + `BasicErrorController` → generic JSON (or HTML whitelabel).
+
+Typical default body: `timestamp`, `status`, `error`, `path` — usually **500**.
+
+`@ResponseStatus` **on the exception class** can still set HTTP status without an handler; the **body** stays the default `/error` shape.
+
+**KT line:** advice = **your** JSON. No match = generic `/error`. That’s why we add `@ExceptionHandler` for types we care about.
+
+---
+
+**Interview line:** Service throws, controller doesn’t catch, **DispatcherServlet** delegates to **HandlerExceptionResolver**, which maps the type to **`@ExceptionHandler`** on **`@RestControllerAdvice`**. That’s MVC exception routing, not AOP on the service. `@Transactional` proxy (if any) still **rethrows** so MVC can map it.
+
 ---
 
 ## 7. Filter vs Interceptor
