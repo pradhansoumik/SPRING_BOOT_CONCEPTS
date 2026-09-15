@@ -44,6 +44,23 @@ Class-level `@RequestMapping("/orders")` + method `@GetMapping("/{id}")` → `GE
 | `@RequestParam` | Query string | `/orders?status=OPEN` |
 | `@RequestBody` | JSON body | POST/PUT/PATCH |
 
+**`@PathVariable` vs `@RequestParam` — what & why**
+
+| | `@PathVariable` | `@RequestParam` |
+|---|---|---|
+| **What** | Piece **of the URL path** | **Query string** after `?` |
+| Example | `GET /orders/42` | `GET /orders?status=OPEN` |
+| Typical | **Which resource** (id, username) | **Filter / sort / page / optional flag** |
+| Required? | Usually **yes** (no id → different URL) | Often **optional** (`required = false`, `defaultValue`) |
+
+**Why choose**
+
+- Path = **identity**: “this order”. REST: `/orders/{id}`, not `/orders?id=42` for the main resource.
+- Query = **how to list/filter**: status, page, size — same resource collection, different view.
+- Mixing: `GET /orders/42/items?page=0` — `42` is path, `page` is query.
+
+**KT line:** **who/which** → path. **optional criteria** → query.
+
 ---
 
 ## 4. DTO — not the entity
@@ -126,6 +143,34 @@ Typical default body: `timestamp`, `status`, `error`, `path` — usually **500**
 
 **Interview line:** Service throws, controller doesn’t catch, **DispatcherServlet** delegates to **HandlerExceptionResolver**, which maps the type to **`@ExceptionHandler`** on **`@RestControllerAdvice`**. That’s MVC exception routing, not AOP on the service. `@Transactional` proxy (if any) still **rethrows** so MVC can map it.
 
+**try/catch in the controller vs `@RestControllerAdvice`**
+
+You **can** catch in the controller. Then advice **does not** run for that exception — you already handled it.
+
+```java
+@GetMapping("/{id}")
+public ResponseEntity<?> get(@PathVariable long id) {
+    try {
+        return ResponseEntity.ok(orders.get(id));
+    } catch (OrderNotFoundException ex) {
+        return ResponseEntity.status(404).body(Map.of("error", ex.getMessage()));
+    }
+}
+```
+
+Mostly we use **`@RestControllerAdvice`** to **centralize** in one place. Otherwise the **same HTTP outcome** (for exceptions the controller method actually sees) can be done with try/catch — you just **repeat** it on every method.
+
+| | try/catch in `get()` | `@RestControllerAdvice` |
+|---|---|---|
+| `OrderNotFoundException` from service | You can catch | Yes, one handler |
+| **Every** controller | Must catch **in each** method | **One** class |
+| **`@Valid` fail** | Happens **before** `create()` → **try never runs** | `MethodArgumentNotValidException` still handled |
+| Other exceptions (filters, etc.) | Won’t see them | Only if they still reach DispatcherServlet |
+
+If you catch and **rethrow**, advice **can** still run.
+
+**KT line:** try/catch = **local**. Advice = **one place for the app**. Prefer advice; try/catch only when that method must do something **different**.
+
 ---
 
 ## 7. Filter vs Interceptor
@@ -141,19 +186,27 @@ Both can log; **Filter** is lower; **Interceptor** knows the **Controller** meth
 HTTP hits the **servlet container** first. **`DispatcherServlet`** is Spring MVC’s front controller. Filter and Interceptor sit on **different sides** of that servlet.
 
 ```text
-Request
+Request (client)
    ▼
-Filter(s)                    ← Jakarta Servlet (around the servlet)
+Filter(s) in                 ← Jakarta Servlet (around the servlet)
    ▼
 DispatcherServlet            ← Spring MVC front door
    ▼
-Interceptor preHandle        ← Spring (only if a Controller is mapped)
+Interceptor preHandle
    ▼
-@Controller / @RestController
+@Controller / @RestController  →  Service
    ▼
-Interceptor postHandle / afterCompletion
+Controller returns (DTO / JSON)
    ▼
-Filter (on the way out)
+Interceptor postHandle
+   ▼
+DispatcherServlet writes HTTP body + status
+   ▼
+Interceptor afterCompletion
+   ▼
+Filter(s) out
+   ▼
+Response (client)
 ```
 
 | | Tied to |
