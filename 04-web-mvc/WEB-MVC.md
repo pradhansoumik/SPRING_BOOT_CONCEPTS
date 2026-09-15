@@ -69,6 +69,9 @@ public OrderResponse create(@Valid @RequestBody OrderRequest req) { ... }
 
 `@Valid` → Bean Validation. Fail → `400` (handle in `@ControllerAdvice`).
 
+> `@Valid` does not check HTTP, JSON syntax, or security. It means: run Bean Validation on this Java object (here, the OrderRequest already built from the body).
+> `@Valid` validates the input requests & actual rules are defined in Requests classes.
+
 ---
 
 ## 6. Exception handling
