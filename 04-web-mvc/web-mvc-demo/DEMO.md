@@ -24,3 +24,15 @@ curl -s -X POST http://localhost:8090/orders -H "Content-Type: application/json"
 ```
 
 Expect: create JSON → 200 get → 404 `{"error":"..."}` → query ping → 400 validation.
+
+**Filter vs Interceptor (console)** — after `GET /orders/1`:
+
+```text
+FILTER  in  GET /orders/1
+INTERCEPTOR preHandle        handler=...OrderController...
+INTERCEPTOR postHandle
+INTERCEPTOR afterCompletion  status=200
+FILTER  out 200
+```
+
+`RequestLogFilter` = around DispatcherServlet. `HandlerLogInterceptor` = inside it (`WebConfig` registers it). Interceptor `handler=` is the controller method — Filter does not print that.

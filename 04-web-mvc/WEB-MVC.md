@@ -235,6 +235,23 @@ Filter does not know “which `@GetMapping`” unless you dig. It can also see r
 
 **KT line:** Filter = **outside** the dispatcher. Interceptor = **inside** it, on the way to the controller.
 
+**Interview example**
+
+Filter = **security at the building gate** (every visitor, doesn’t know the meeting room).  
+Interceptor = **receptionist** who already knows you’re going to **OrderController.get**.
+
+Real talk: Filter = CORS / wrap request / “is there a token?”. Interceptor = log **which handler**, add a request id for MVC only.
+
+**Demo:** `web-mvc-demo` — `RequestLogFilter` + `HandlerLogInterceptor`. Hit `GET /orders/1` and read the console:
+
+```text
+FILTER  in  GET /orders/1
+INTERCEPTOR preHandle        handler=OrderController#get(...)
+INTERCEPTOR postHandle
+INTERCEPTOR afterCompletion  status=200
+FILTER  out 200
+```
+
 ---
 
 ## 8. Swagger / OpenAPI
