@@ -89,6 +89,23 @@ public OrderResponse create(@Valid @RequestBody OrderRequest req) { ... }
 > `@Valid` does not check HTTP, JSON syntax, or security. It means: run Bean Validation on this Java object (here, the OrderRequest already built from the body).
 > `@Valid` validates the input requests & actual rules are defined in Request POJO/DTO Classes.
 
+**Flow (client → gate)**
+
+```text
+1. Client POST JSON  { "item":"pizza", "qty":2 }
+2. DispatcherServlet → OrderController.create(...)
+3. @RequestBody  →  Jackson builds OrderRequest
+4. @Valid        →  Bean Validation (@NotBlank, @Min on the DTO)
+      │
+      ├─ OK   →  create() runs → OrderService
+      └─ fail →  MethodArgumentNotValidException
+                    → HandlerExceptionResolver
+                    → ApiErrors.invalid() → 400 JSON
+                    (service never called)
+```
+
+Malformed JSON fails at **step 3** (Jackson), not `@Valid`.
+
 ---
 
 ## 6. Exception handling
