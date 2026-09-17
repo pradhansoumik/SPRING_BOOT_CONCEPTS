@@ -252,6 +252,8 @@ INTERCEPTOR afterCompletion  status=200
 FILTER  out 200
 ```
 
+**404** (handler throws): **`postHandle` is skipped**; `afterCompletion` still runs (`status=404`). Filter in/out still wrap everything.
+
 ---
 
 ## 8. Swagger / OpenAPI

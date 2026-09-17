@@ -36,3 +36,14 @@ FILTER  out 200
 ```
 
 `RequestLogFilter` = around DispatcherServlet. `HandlerLogInterceptor` = inside it (`WebConfig` registers it). Interceptor `handler=` is the controller method — Filter does not print that.
+
+**404** `GET /orders/99` (service throws) — **`postHandle` is missing**:
+
+```text
+FILTER  in  GET /orders/99
+INTERCEPTOR preHandle        handler=...OrderController#get(long)
+INTERCEPTOR afterCompletion  status=404
+FILTER  out 404
+```
+
+`postHandle` runs only if the handler **returns normally**. Exception → advice still maps 404; `afterCompletion` still runs.
