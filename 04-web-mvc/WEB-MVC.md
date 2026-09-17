@@ -215,11 +215,11 @@ Interceptor preHandle
    ▼
 Controller returns (DTO / JSON)
    ▼
-Interceptor postHandle
+Interceptor postHandle (runs only if a handler (controller) was successfully invoked & it is skipped in error scenarios like 400/404)
    ▼
 DispatcherServlet writes HTTP body + status
    ▼
-Interceptor afterCompletion
+Interceptor afterCompletion (cleanup hook)
    ▼
 Filter(s) out
    ▼
@@ -254,6 +254,95 @@ FILTER  out 200
 
 **404** (handler throws): **`postHandle` is skipped**; `afterCompletion` still runs (`status=404`). Filter in/out still wrap everything.
 
+**Scenarios**
+- Scenario 1: Controller executes successfully
+```text
+Client Request
+▼
+Filter in
+▼
+Interceptor preHandle
+▼
+Controller executes → returns DTO/JSON (200/201)
+▼
+Interceptor postHandle
+▼
+DispatcherServlet + HttpMessageConverter → serialize response
+▼
+Interceptor afterCompletion (status=200)
+▼
+Filter out
+▼
+Client Response (success)
+```
+- Scenario 2: Controller executes but returns error
+```text
+Client Request
+   ▼
+Filter in
+   ▼
+Interceptor preHandle
+   ▼
+Controller executes → returns error status (404/400 etc.)
+   ▼
+Interceptor postHandle (skipped)
+   ▼
+Interceptor afterCompletion (status=error)
+   ▼
+Filter out
+   ▼
+Client Response (error JSON/HTML)
+```
+- Scenario 3: No controller found (wrong URL)
+```text
+Client Request
+   ▼
+Filter in
+   ▼
+Interceptor preHandle (ResourceHttpRequestHandler)
+   ▼
+No controller → 404
+   ▼
+Interceptor postHandle (skipped)
+   ▼
+Interceptor afterCompletion (status=404)
+   ▼
+Filter out (404)
+   ▼
+Forward internally → BasicErrorController#error
+   ▼
+Interceptor preHandle
+   ▼
+Error controller executes → postHandle
+   ▼
+Interceptor afterCompletion (status=404)
+   ▼
+Client Response (error JSON/HTML)
+```
+- Scenario 4: Validation failure (400 Bad Request)
+```text
+Client Request
+   ▼
+Filter in
+   ▼
+Interceptor preHandle
+   ▼
+DispatcherServlet → Controller found
+   ▼
+Binding/Validation fails → MethodArgumentNotValidException / HttpMessageNotReadableException
+   ▼
+Controller body not executed
+   ▼
+Interceptor postHandle (skipped)
+   ▼
+ExceptionResolver → generates 400 response
+   ▼
+Interceptor afterCompletion (status=400)
+   ▼
+Filter out
+   ▼
+Client Response (error JSON/HTML)
+```
 ---
 
 ## 8. Swagger / OpenAPI
