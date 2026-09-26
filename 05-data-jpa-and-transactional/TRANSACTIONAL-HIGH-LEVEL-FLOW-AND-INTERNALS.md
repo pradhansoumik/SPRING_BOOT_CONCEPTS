@@ -4,27 +4,27 @@
 
 ```text
 Client Request
-      |
-      v
+      │
+      ▼
    Proxy (AOP)
-      |
-      v
-Transaction Interceptor -> TransactionAspectSupport
-      |
-      v
-Transaction Manager -> PlatformTransactionManager
-      |
-      v
+      │
+      ▼
+Transaction Interceptor → TransactionAspectSupport
+      │
+      ▼
+Transaction Manager → PlatformTransactionManager
+      │
+      ▼
 Connection / EntityManager
-      |
-      v
+      │
+      ▼
 Business Logic
-      |
-      v
+      │
+      ▼
 Commit / Rollback
-      |
-      v
-  Response
+      │
+      ▼
+Response
 ```
 
 When a method is annotated with `@Transactional`, Spring wraps it in a proxy.
