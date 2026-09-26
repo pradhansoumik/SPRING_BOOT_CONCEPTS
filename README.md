@@ -12,7 +12,7 @@ Interview notes, diagrams, and (later) small demos for Spring Boot.
 | 02 | **IoC, DI & Beans** | ✅ Notes |
 | 03 | **Configuration & Profiles** | ✅ Notes |
 | 04 | **Web Layer (MVC)** | ✅ Notes |
-| 05 | Data JPA & `@Transactional` | ⏳ Next |
+| 05 | Data JPA & `@Transactional` | ✅ Notes |
 | 06 | Security (Boot wiring) | ⏳ |
 | 07 | Cross-cutting & Ops | ⏳ |
 
@@ -51,3 +51,9 @@ All internals notes + demo live in **`01-fundamentals/spring-boot-internals/`**.
 |---|---|
 | Web MVC | [`04-web-mvc/WEB-MVC.md`](04-web-mvc/WEB-MVC.md) |
 | Web MVC **demo** | [`04-web-mvc/web-mvc-demo/DEMO.md`](04-web-mvc/web-mvc-demo/DEMO.md) |
+
+## 05 — Data JPA & `@Transactional`
+
+| Doc | Path |
+|---|---|
+| Data JPA & `@Transactional` | [`05-data-jpa-and-transactional/DATA-JPA-TRANSACTIONAL.md`](05-data-jpa-and-transactional/DATA-JPA-TRANSACTIONAL.md) |
