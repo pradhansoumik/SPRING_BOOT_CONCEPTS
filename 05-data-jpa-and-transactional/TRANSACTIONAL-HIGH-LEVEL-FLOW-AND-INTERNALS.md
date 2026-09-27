@@ -234,7 +234,12 @@ Transactional method -> Transactional method [join existing transaction]
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 ```
 
-- Suspends the current transaction and runs without one.
+Definition:
+- If you want to skip the transaction for a particular method, use this propagation.
+- It suspends the current transaction and runs the method without one.
+
+Usage:
+- Useful for non-critical side effects such as sending notifications, logging, or calling external systems where a transaction is not needed.
 
 ```text
 Non-Transactional method -> Transactional method [transaction is null]
