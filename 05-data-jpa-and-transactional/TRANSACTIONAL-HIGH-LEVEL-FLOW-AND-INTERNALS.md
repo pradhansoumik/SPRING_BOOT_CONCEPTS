@@ -252,8 +252,13 @@ Transactional method -> Transactional method [transaction is null]
 @Transactional(propagation = Propagation.NEVER)
 ```
 
-- Must not run inside a transaction.
-- If a transaction exists, it throws `IllegalTransactionStateException`.
+Definition:
+- This propagation is used when a method must never run inside a transaction.
+- If a transaction already exists, it throws `IllegalTransactionStateException`.
+- Here, we don't need any transactions to be happened.
+
+Usage:
+- Use it for read-only checks, monitoring, health checks, or any method that should always execute without transaction context.
 
 ```text
 Non-Transactional method -> Transactional method [transaction is null]
