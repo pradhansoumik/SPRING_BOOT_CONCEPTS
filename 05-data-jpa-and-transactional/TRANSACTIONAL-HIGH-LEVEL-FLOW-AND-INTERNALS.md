@@ -168,6 +168,10 @@ Transactional method -> Transactional method [newTransaction = false]
 
 ### `REQUIRES_NEW`
 
+```java
+@Transactional(propagation = Propagation.REQUIRES_NEW)
+```
+
 - Always creates a new transaction.
 - Suspends the existing transaction before starting a new one.
 
@@ -180,6 +184,10 @@ This means the method will not join the existing transaction; it creates a fresh
 
 ### `MANDATORY`
 
+```java
+@Transactional(propagation = Propagation.MANDATORY)
+```
+
 - Must run inside an existing transaction.
 - It will not create a new transaction.
 - If no transaction exists, it throws `IllegalTransactionStateException`.
@@ -190,6 +198,10 @@ Non-Transactional method -> Transactional method [throws IllegalTransactionState
 ```
 
 ### `NESTED`
+
+```java
+@Transactional(propagation = Propagation.NESTED)
+```
 
 - Creates a nested transaction if supported.
 - Uses a savepoint.
@@ -204,6 +216,10 @@ This behaves like a nested transaction inside the same transaction flow and can 
 
 ### `SUPPORTS`
 
+```java
+@Transactional(propagation = Propagation.SUPPORTS)
+```
+
 - Runs with a transaction if one exists.
 - Otherwise runs without one.
 
@@ -214,6 +230,10 @@ Transactional method -> Transactional method [join existing transaction]
 
 ### `NOT_SUPPORTED`
 
+```java
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
+```
+
 - Suspends the current transaction and runs without one.
 
 ```text
@@ -222,6 +242,10 @@ Transactional method -> Transactional method [transaction is null]
 ```
 
 ### `NEVER`
+
+```java
+@Transactional(propagation = Propagation.NEVER)
+```
 
 - Must not run inside a transaction.
 - If a transaction exists, it throws `IllegalTransactionStateException`.
