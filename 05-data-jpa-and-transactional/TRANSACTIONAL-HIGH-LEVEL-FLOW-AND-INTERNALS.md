@@ -279,9 +279,29 @@ Transaction A updates a row while Transaction B reads it before A commits.
 
 A transaction reads the same row twice and gets different values because another transaction updated it in between.
 
+Scenario:
+
+```text
+User-1 is trying to fetch one specific data [Transaction A] = result abc, user-2 updates the same data [Transaction B].
+user-1 is trying to fetch the same data [within same Transaction A] = result xyz
+
+so, in a same Transaction if user is getting different value for the same query - it is called non-repeatable Txn & it is for single row.
+```
+
 ### Phantom Read
 
-A transaction reads a range of rows and gets different results because another transaction inserted or deleted rows in between.
+kind of similar to non-repeatable but it deals with multiple records.
+
+```text
+select * from book where price < 100;
+
+in Transaction B some user has inserted new data with price less than 100;
+then if you select * from book where price < 100 = you will get different data (multiple rows)
+```
+
+This means the same query in the same transaction can return a different set of rows because another transaction inserted or deleted rows in between.
+
+`Each Database has its own isolation level.`
 
 ### Isolation options
 
@@ -290,16 +310,33 @@ A transaction reads a range of rows and gets different results because another t
 - `REPEATABLE_READ`
 - `SERIALIZABLE`
 
-```java
-@Transactional(isolation = Isolation.READ_COMMITTED)
+```text
+syntax = @Transactional(propagation = Propagation.REQUIRED, isolation = READ_UNCOMMITTED)
 ```
 
-### Meaning
+```text
+isolation = READ_UNCOMMITTED
 
-- `READ_UNCOMMITTED`: lowest isolation; dirty reads possible.
-- `READ_COMMITTED`: prevents dirty reads; non-repeatable/phantom reads may still occur.
-- `REPEATABLE_READ`: prevents dirty and non-repeatable reads; phantom reads may remain.
-- `SERIALIZABLE`: strongest isolation; most consistent but slower and more locking.
+    > when we are dealing with read only data we can use this.
+
+isolation = READ_COMMITTED
+
+    > dirty reads can be prevented but non-repeatable & phantom reads can occur problem.
+    > can acquire locks [shared & exclusive lock]
+
+        shared lock - is partial lock on read operation for particular row.
+        exclusive lock - hard lock while updating the data.
+
+isolation = REPEATABLE
+
+    > dirty reads, non-repeatable can be prevented but phantom reads can occur problem.
+    > it will acquire shared lock for read only data but for the entire transactions.
+
+isolation = SERIALIZABLE
+
+    > all the problems will be solved here.
+    > it acquires lock for the entire range of the transaction. so no other thread can interrupt.
+```
 
 ---
 
