@@ -159,9 +159,12 @@ Default:
 - If not, start a new one.
 
 ```text
-Non-Transactional method -> Transactional method [new transaction]
-Transactional method -> Transactional method [join existing transaction]
+Non-Transactional method -> Transactional method [newTransaction = true]
+Transactional method -> Transactional method [newTransaction = false]
 ```
+
+`newTransaction = true` means a new transaction is started.
+`newTransaction = false` means the method is joining the current transaction from the caller.
 
 ### `REQUIRES_NEW`
 
@@ -169,16 +172,20 @@ Transactional method -> Transactional method [join existing transaction]
 - Suspends the existing transaction before starting a new one.
 
 ```text
-Transactional method -> Transactional method [new transaction created]
+Non-Transactional method -> Transactional method [newTransaction = true]
+Transactional method -> Transactional method [newTransaction = true]
 ```
+
+This means the method will not join the existing transaction; it creates a fresh one even if another transaction is active.
 
 ### `MANDATORY`
 
 - Must run inside an existing transaction.
-- If there is no active transaction, it throws `IllegalTransactionStateException`.
+- It will not create a new transaction.
+- If no transaction exists, it throws `IllegalTransactionStateException`.
 
 ```text
-Transactional method -> Transactional method [join existing transaction]
+Transactional method -> Transactional method [newTransaction = false]
 Non-Transactional method -> Transactional method [throws IllegalTransactionStateException]
 ```
 
@@ -186,25 +193,43 @@ Non-Transactional method -> Transactional method [throws IllegalTransactionState
 
 - Creates a nested transaction if supported.
 - Uses a savepoint.
-- A failure after savepoint can roll back only the nested block.
+- A failure after the savepoint can roll back only the nested block.
 
 ```text
-Transactional method -> Transactional method [nested transaction]
+Non-Transactional method -> Transactional method [newTransaction = true]
+Transactional method -> Transactional method [newTransaction = true]
 ```
+
+This behaves like a nested transaction inside the same transaction flow and can support partial rollback.
 
 ### `SUPPORTS`
 
 - Runs with a transaction if one exists.
 - Otherwise runs without one.
 
+```text
+Non-Transactional method -> Transactional method [transaction is null]
+Transactional method -> Transactional method [join existing transaction]
+```
+
 ### `NOT_SUPPORTED`
 
-- Suspends the transaction and runs without one.
+- Suspends the current transaction and runs without one.
+
+```text
+Non-Transactional method -> Transactional method [transaction is null]
+Transactional method -> Transactional method [transaction is null]
+```
 
 ### `NEVER`
 
 - Must not run inside a transaction.
 - If a transaction exists, it throws `IllegalTransactionStateException`.
+
+```text
+Non-Transactional method -> Transactional method [transaction is null]
+Transactional method -> Transactional method [throws IllegalTransactionStateException]
+```
 
 ---
 
