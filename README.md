@@ -57,5 +57,6 @@ All internals notes + demo live in **`01-fundamentals/spring-boot-internals/`**.
 | Doc | Path |
 |---|---|
 | Data JPA & `@Transactional` | [`05-data-jpa-and-transactional/DATA-JPA-TRANSACTIONAL.md`](05-data-jpa-and-transactional/DATA-JPA-TRANSACTIONAL.md) |
+| `@Transactional` internals | [`05-data-jpa-and-transactional/TRANSACTIONAL-HIGH-LEVEL-FLOW-AND-INTERNALS.md`](05-data-jpa-and-transactional/TRANSACTIONAL-HIGH-LEVEL-FLOW-AND-INTERNALS.md) |
 | Interview revision sheet | [`05-data-jpa-and-transactional/INTERVIEW-REVISION-SHEET.md`](05-data-jpa-and-transactional/INTERVIEW-REVISION-SHEET.md) |
 | Demo | [`05-data-jpa-and-transactional/data-jpa-demo/DEMO.md`](05-data-jpa-and-transactional/data-jpa-demo/DEMO.md) |
