@@ -104,6 +104,27 @@ Common methods from `JpaRepository`:
 - `deleteById()`
 - `count()`
 
+#### `save()` vs `saveAndFlush()`
+
+- `save()` persists or updates the entity; JPA flushes changes at commit or when needed.
+- `saveAndFlush()` also flushes pending changes immediately, sending SQL to the database.
+- So the key difference: **`saveAndFlush()` sends SQL sooner; it does not commit sooner.**
+- Both follow the transaction boundary and can be rolled back before commit.
+
+```text
+Before flush
+    JPA keeps entity changes in the EntityManager's persistence context in application memory.
+            |
+            v
+After flush
+    SQL has reached the database, but changes are still uncommitted.
+    Other transactions generally cannot see them, depending on isolation level.
+            |
+            +---- Success ----> Commit: changes become permanent and visible.
+            |
+            +---- Failure ----> Rollback: changes are discarded and prior state is restored.
+```
+
 ---
 
 ## 3. CRUD flow in Spring Data JPA

@@ -37,6 +37,27 @@ public class AccountService {
         accountRepository.save(to);
     }
 
+    /**
+     * In transferMoneyWithoutTransaction(), there is no service-level transaction, so saveAndFlush() starts or uses the repository’s own transaction.
+     * That repository transaction commits when saveAndFlush() returns. Therefore, by the time the next line throws the simulated exception, the sender’s balance update has already committed.
+     *
+     *  Service-level transaction means putting @Transactional on a service method, such as transferMoney(). That creates one transaction around the whole business operation.
+     *
+     * A repository’s own transaction is the transaction Spring Data JPA applies to repository methods like save() and saveAndFlush(). These methods use Propagation.REQUIRED: they join an existing transaction, or start their own if none exists.
+     *
+     * In your no-transaction service method:
+     *
+         * saveAndFlush() starts a repository transaction.
+         * It flushes the SQL and commits when the repository call returns.
+         * The later exception is outside that transaction, so it cannot roll back the saved update.
+     *
+     * With @Transactional on the service method, the repository call joins the service transaction; the exception can then roll back the whole operation.
+     *
+     * @param fromId
+     * @param toId
+     * @param amount
+     */
+    //@Transactional
     public void transferMoneyWithoutTransaction(Long fromId, Long toId, BigDecimal amount) {
         Account from = accountRepository.findById(fromId)
                 .orElseThrow(() -> new IllegalArgumentException("From account not found"));
