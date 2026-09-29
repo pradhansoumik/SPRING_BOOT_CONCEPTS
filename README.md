@@ -13,7 +13,7 @@ Interview notes, diagrams, and (later) small demos for Spring Boot.
 | 03 | **Configuration & Profiles** | ✅ Notes |
 | 04 | **Web Layer (MVC)** | ✅ Notes |
 | 05 | Data JPA & `@Transactional` | ✅ Notes |
-| 06 | Security (Boot wiring) | ⏳ |
+| 06 | Security (Boot wiring) | ✅ Notes |
 | 07 | Cross-cutting & Ops | ⏳ |
 
 ## 01 — Fundamentals
@@ -60,3 +60,9 @@ All internals notes + demo live in **`01-fundamentals/spring-boot-internals/`**.
 | `@Transactional` internals | [`05-data-jpa-and-transactional/TRANSACTIONAL-HIGH-LEVEL-FLOW-AND-INTERNALS.md`](05-data-jpa-and-transactional/TRANSACTIONAL-HIGH-LEVEL-FLOW-AND-INTERNALS.md) |
 | Interview revision sheet | [`05-data-jpa-and-transactional/INTERVIEW-REVISION-SHEET.md`](05-data-jpa-and-transactional/INTERVIEW-REVISION-SHEET.md) |
 | Demo | [`05-data-jpa-and-transactional/data-jpa-demo/DEMO.md`](05-data-jpa-and-transactional/data-jpa-demo/DEMO.md) |
+
+## 06 — Security (Boot wiring)
+
+| Doc | Path |
+|---|---|
+| Spring Security (Boot wiring) | [`06-security-boot-wiring/SPRING-SECURITY-BOOT-WIRING.md`](06-security-boot-wiring/SPRING-SECURITY-BOOT-WIRING.md) |
