@@ -29,6 +29,19 @@ AccountService.transferMoney()
 - If amount is too large, method throws and transaction rolls back.
 - The controller exposes this as a small API so you can test the flow easily.
 
+## H2 console
+
+1. Start the app and open `http://localhost:8080/h2-console`.
+2. Use these connection details:
+
+```text
+JDBC URL: jdbc:h2:mem:datajpa-demo
+User Name: sa
+Password: (leave blank)
+```
+
+3. Click **Connect**. The in-memory database is available only while the app is running.
+
 ## API endpoints
 
 ### 1) Seed accounts
