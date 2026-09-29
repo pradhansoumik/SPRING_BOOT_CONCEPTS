@@ -14,4 +14,10 @@ public class HandleException {
     public Map<String, String> handleInsufficientFundsException(InsufficientFundsException ex) {
         return Map.of("error", ex.getMessage());
     }
+
+    @ExceptionHandler(SimulatedTransferFailureException.class)
+    @ResponseStatus(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map<String, String> handleSimulatedTransferFailure(SimulatedTransferFailureException ex) {
+        return Map.of("error", ex.getMessage());
+    }
 }

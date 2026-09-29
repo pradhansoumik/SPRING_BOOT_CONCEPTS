@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.entity.Account;
 import com.example.demo.exception.InsufficientFundsException;
+import com.example.demo.exception.SimulatedTransferFailureException;
 import com.example.demo.repository.AccountRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,23 @@ public class AccountService {
 
         accountRepository.save(from);
         accountRepository.save(to);
+    }
+
+    public void transferMoneyWithoutTransaction(Long fromId, Long toId, BigDecimal amount) {
+        Account from = accountRepository.findById(fromId)
+                .orElseThrow(() -> new IllegalArgumentException("From account not found"));
+        accountRepository.findById(toId)
+                .orElseThrow(() -> new IllegalArgumentException("To account not found"));
+
+        if (from.getBalance().compareTo(amount) < 0) {
+            throw new InsufficientFundsException("Insufficient balance");
+        }
+
+        from.setBalance(from.getBalance().subtract(amount));
+        accountRepository.saveAndFlush(from);
+
+        throw new SimulatedTransferFailureException(
+                "Simulated failure after sender balance was saved; recipient was not credited");
     }
 
     @Transactional

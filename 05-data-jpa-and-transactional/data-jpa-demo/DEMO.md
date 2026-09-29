@@ -12,6 +12,7 @@ This demo uses **H2 in-memory DB** and shows the real transaction flow through a
 AccountController
   ├─ POST /api/accounts/seed
   └─ POST /api/accounts/transfer
+  └─ POST /api/accounts/transfer-without-transaction
 
 AccountService.transferMoney()
   ├─ load from accountRepository
@@ -76,6 +77,24 @@ Response:
   "toBalance": 750
 }
 ```
+
+### 3) Observe failure without a service transaction
+
+Restart the app to clear the in-memory database, then seed the accounts again. Call this endpoint with the same request:
+
+```bash
+curl -X POST http://localhost:8080/api/accounts/transfer-without-transaction \
+  -H "Content-Type: application/json" \
+  -d '{"fromId":1,"toId":2,"amount":250}'
+```
+
+The endpoint intentionally returns `500` after the sender update is saved. In the H2 console, run:
+
+```sql
+SELECT id, email, balance FROM accounts;
+```
+
+The sender will have `750.00`, while the recipient remains at `500.00`. The repository save committed independently, so there is no outer service transaction to roll it back. This endpoint is intentionally unsafe and exists only to demonstrate the partial-update scenario.
 
 ## Typical runtime behaviour
 

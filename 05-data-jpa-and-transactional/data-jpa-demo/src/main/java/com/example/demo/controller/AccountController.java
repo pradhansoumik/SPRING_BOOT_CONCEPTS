@@ -44,6 +44,13 @@ public class AccountController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/transfer-without-transaction")
+    public ResponseEntity<Void> transferMoneyWithoutTransaction(@RequestBody TransferRequest request) {
+        accountService.transferMoneyWithoutTransaction(
+                request.fromId(), request.toId(), request.amount());
+        return ResponseEntity.noContent().build();
+    }
+
     public record TransferRequest(Long fromId, Long toId, BigDecimal amount) {
     }
 }
