@@ -2,7 +2,7 @@
 
 **Scope:** OAuth2 / OpenID Connect, JWT authentication, role-based vs. attribute-based access control, and the Spring Boot 3 security DSL.
 
-**Reference notes:** `https://github.com/pradhansoumik/MICROSERVICE-DESIGN-PATTERNS/tree/main/00-fundamentals/security`
+**Reference notes:** [MICROSERVICE-DESIGN-PATTERNS/00-fundamentals/security](https://github.com/pradhansoumik/MICROSERVICE-DESIGN-PATTERNS/tree/main/00-fundamentals/security)
 
 **Runnable reference:** `00-fundamentals/security/security-sso-demo/`
 
